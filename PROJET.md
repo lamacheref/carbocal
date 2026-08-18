@@ -1,5 +1,7 @@
 # Projet d'import massif de rendez-vous XLSX vers Carbonio
 
+Les fichiers de références pour le développement se trouvent dans le dossier ref/
+
 ## Objectif
 
 Créer une petite interface graphique, simple pour des utilisateurs finaux, permettant de charger un fichier XLSX **normalisé**, de le valider, de le convertir en rendez-vous Carbonio, puis de pousser les créations par **lots** afin de limiter l'impact sur la plateforme distante. Carbonio permet l'import de calendriers au format `.ics`, et expose aussi une API SOAP permettant de créer des rendez-vous avec participants et invitations.[cite:50][cite:21][cite:53]
