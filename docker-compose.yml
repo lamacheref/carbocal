@@ -1,7 +1,16 @@
+# Tire l'image publiée sur GitHub Container Registry (backup/registre public).
+#
+#   docker compose up -d
+#
+# Prérequis : l'image ghcr.io/lamacheref/carbocal est publique,
+# ou `docker login ghcr.io -u lamacheref` avec un PAT (read:packages).
+#
+# Variable (optionnelle) : CARBOCAL_SERVER_URL (défaut https://mail.smiden.fr)
+
 services:
   carbocal:
-    build: .
-    image: carbocal:0.3.0
+    image: ghcr.io/lamacheref/carbocal:latest
+    pull_policy: always
     container_name: carbocal
     ports:
       - "8123:8000"

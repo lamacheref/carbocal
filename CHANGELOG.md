@@ -30,6 +30,9 @@ Le numéro de version suit le schéma `M.m.f` et le fichier `VERSION` fait foi.
 - **CI/CD Gitea Actions** (`.gitea/workflows/docker.yml`) : build + push de l'image `gitea.smiden.eu/flamachere/carbocal` sur push `main` et tags `v*` (secrets `CC_USER` / `CC_TOKEN` requis).
 - **`docker-compose.prod.yml`** : déploiement en tirant l'image publiée (`docker compose -f docker-compose.prod.yml up -d`).
 - Cache de build Docker via le registre (`type=registry`, ref `carbocal:buildcache`) au lieu de `type=gha` (backend GitHub, inopérant sur Gitea) — builds incrémentaux plus rapides.
+- **Backup GitHub** : remote `github` (`git@github.com:lamacheref/carbocal.git`), push Gitea en premier puis GitHub.
+- **Workflow GitHub Actions** (`.github/workflows/docker.yml`) : build + push de l'image `ghcr.io/lamacheref/carbocal` sur push `main` et tags `v*`.
+- **`docker-compose.yml`** : tire désormais l'image `ghcr.io/lamacheref/carbocal:latest` (registre GitHub) au lieu de builder en local ; `docker-compose.prod.yml` reste branché sur le registre Gitea.
 
 ## [0.3.0] — 2026-08-19
 
