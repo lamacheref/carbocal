@@ -29,6 +29,7 @@ Le numéro de version suit le schéma `M.m.f` et le fichier `VERSION` fait foi.
 
 - **CI/CD Gitea Actions** (`.gitea/workflows/docker.yml`) : build + push de l'image `gitea.smiden.eu/flamachere/carbocal` sur push `main` et tags `v*` (secrets `CC_USER` / `CC_TOKEN` requis).
 - **`docker-compose.prod.yml`** : déploiement en tirant l'image publiée (`docker compose -f docker-compose.prod.yml up -d`).
+- Cache de build Docker via le registre (`type=registry`, ref `carbocal:buildcache`) au lieu de `type=gha` (backend GitHub, inopérant sur Gitea) — builds incrémentaux plus rapides.
 
 ## [0.3.0] — 2026-08-19
 
