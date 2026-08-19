@@ -59,6 +59,11 @@ async def favicon_png() -> FileResponse:
     return FileResponse(_STATIC / "favicon.png", media_type="image/png")
 
 
+@app.get("/logo.png")
+async def logo() -> FileResponse:
+    return FileResponse(_STATIC / "logo.png", media_type="image/png")
+
+
 @app.get("/template")
 async def template() -> Response:
     wb = Workbook()
