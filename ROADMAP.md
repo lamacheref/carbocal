@@ -6,7 +6,11 @@ Référence détaillée : `PROJET.md`. Version actuelle : `VERSION`.
 
 ## Vision
 
-Petite application web interne : charger un XLSX normalisé → valider → convertir en rendez-vous Carbonio → créer par lots via API SOAP (mode principal) ou générer des `.ics` (mode secours).
+Convertir un XLSX **normalisé** en rendez-vous importables dans Carbonio, puis automatiser leur création.
+
+- **Phase 1 (urgente)** : un unique fichier `.ics` importable manuellement dans Carbonio (RRULE + RDATE/EXDATE, VTIMEZONE Europe/Paris, ATTENDEE).
+- **Phase 2** : création automatique via **CalDAV** (validé par le provider).
+- **Optionnel** : API SOAP Carbonio, déconseillée, uniquement post-release.
 
 ## Jalons
 
@@ -14,34 +18,26 @@ Petite application web interne : charger un XLSX normalisé → valider → conv
 - Statut : ✅ terminé
 - Livrables : `TODO.md`, `ROADMAP.md`, `CHANGELOG.md`, `VERSION`, `README.md`.
 
-### Jalon 1 — Vérification de Carbonio (Étape 1)
-- Statut : ⬜ à venir
-- Objectif : prouver que `AuthRequest` et `CreateAppointment` fonctionnent sur l'instance cible.
-- Livrable : note de validation + petit script de test.
+### Jalon 1 — Convertisseur XLSX → ICS (urgent)
+- Statut : 🔄 en cours
+- Objectif : produire un `.ics` unique, fidèle au fichier source, importable manuellement dans l'interface Calendrier de Carbonio.
+- Livrables : parsing XLSX, détection des récurrences (RRULE + RDATE/EXDATE), VTIMEZONE `Europe/Paris`, `ATTENDEE`/organisateur, **CLI** + **GUI web FastAPI**, validation du `.ics`.
+- Critère de sortie : conversion du fichier de référence et import validé dans Carbonio.
 
-### Jalon 2 — Modèle XLSX (Étape 2)
+### Jalon 2 — Ajout automatique via CalDAV (phase 2)
 - Statut : ⬜ à venir
-- Objectif : fixer le mapping entre le fichier de référence (`ref/20260813_Calendrier_Consolide_Carbonio_FINAL_Marie.xlsx`, feuille `Import_Carbonio`) et le format normalisé.
-- Livrables : modèle vierge, règles de validation.
+- Objectif : créer les rendez-vous directement dans Carbonio via CalDAV.
+- Livrables : client CalDAV, mapping récurrence/invités, mode import automatique (lots, journal).
+- Prérequis : accès CalDAV fourni par le provider (validé).
 
-### Jalon 3 — Prototype CLI (Étape 3)
-- Statut : ⬜ à venir
-- Objectif : lire, valider, créer et batcher depuis la ligne de commande.
-- Livrable : moteur d'import testable.
+### Jalon 3 — API SOAP Carbonio (optionnel, post-release)
+- Statut : ⬜ non retenu pour l'instant
+- Objectif : `CreateAppointment` si le provider autorise l'API SOAP.
+- Note : voie déconseillée par le provider ; à réévaluer après la release.
 
-### Jalon 4 — Prototype GUI (Étape 4)
+### Jalon 4 — Recette
 - Statut : ⬜ à venir
-- Objectif : interface web minimale (upload, prévisualisation, simulation, import).
-- Livrable : application FastAPI + HTML simple.
-
-### Jalon 5 — Industrialisation (Étape 5)
-- Statut : ⬜ à venir
-- Objectif : reprise, rapports exportables, mode ICS de secours, verrou d'exécution.
-- Livrable : application robuste prête pour la recette.
-
-### Jalon 6 — Recette (Étape 6)
-- Statut : ⬜ à venir
-- Objectif : valider les scénarios nominaux et en erreur sur préproduction.
+- Objectif : valider les scénarios nominaux et en erreur.
 - Livrable : PV de recette.
 
 ## Règles de versioning
