@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import io
+import os
 import time
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse, Response
+from openpyxl import Workbook
+from openpyxl.styles import Font
 from pydantic import BaseModel
 
 from .caldav_client import CalDavError, CalDavClient, import_events
@@ -13,9 +16,13 @@ from .ics_builder import build_event_ics, build_ics
 from .transformer import build_events
 from .xlsx_parser import parse_workbook
 
-app = FastAPI(title="SendRendezvous", version="0.3.0")
+app = FastAPI(title="CarboCal", version="0.3.0")
 
 _TEMPLATES = Path(__file__).parent / "templates"
+
+DEFAULT_SERVER = os.environ.get("CARBOCAL_SERVER_URL", "https://mail.smiden.fr")
+
+_TEMPLATE_COLUMNS = ["Sujet", "Date", "Heure début", "Heure fin", "Lieu", "Invités"]
 
 
 class Credentials(BaseModel):
@@ -28,7 +35,7 @@ def _load_rows(content: bytes, filename: str) -> tuple[list, list[str]]:
     try:
         rows, errors = parse_workbook(io.BytesIO(content))
     except Exception as exc:  # openpyxl raises various exceptions
-        raise HTTPException(status_code=400, detail=f"Lecture du XLSX impossible : {exc}")
+        raise HTTPException(status_code=400, detail=f"Lecture du fichier impossible : {exc}")
     if not rows:
         detail = "\n".join(errors) or "aucune ligne exploitable"
         raise HTTPException(status_code=400, detail=detail)
@@ -37,7 +44,36 @@ def _load_rows(content: bytes, filename: str) -> tuple[list, list[str]]:
 
 @app.get("/", response_class=HTMLResponse)
 async def index() -> str:
-    return (_TEMPLATES / "index.html").read_text(encoding="utf-8")
+    html = (_TEMPLATES / "index.html").read_text(encoding="utf-8")
+    return html.replace("__CARBOCAL_SERVER__", DEFAULT_SERVER)
+
+
+@app.get("/template")
+async def template() -> Response:
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Import_Carbonio"
+    ws.append(_TEMPLATE_COLUMNS)
+    for cell in ws[1]:
+        cell.font = Font(bold=True)
+    ws.freeze_panes = "A2"
+    ws.column_dimensions["A"].width = 40
+    ws.column_dimensions["B"].width = 14
+    ws.column_dimensions["C"].width = 14
+    ws.column_dimensions["D"].width = 14
+    ws.column_dimensions["E"].width = 26
+    ws.column_dimensions["F"].width = 40
+    buf = io.BytesIO()
+    wb.save(buf)
+    return Response(
+        content=buf.getvalue(),
+        media_type=(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ),
+        headers={
+            "Content-Disposition": 'attachment; filename="Modele_Import_Carbonio.xlsx"'
+        },
+    )
 
 
 @app.post("/convert")
@@ -61,10 +97,10 @@ async def convert(
     filename = Path(file.filename).stem + ".ics"
     headers = {
         "Content-Disposition": f'attachment; filename="{filename}"',
-        "X-SendRendezvous-Recurring": str(len(result.recurring_events)),
-        "X-SendRendezvous-Single": str(len(result.single_events)),
-        "X-SendRendezvous-Skipped": str(result.rows_skipped),
-        "X-SendRendezvous-Errors": str(len(parse_errors) + len(result.errors)),
+        "X-CarboCal-Recurring": str(len(result.recurring_events)),
+        "X-CarboCal-Single": str(len(result.single_events)),
+        "X-CarboCal-Skipped": str(result.rows_skipped),
+        "X-CarboCal-Errors": str(len(parse_errors) + len(result.errors)),
     }
     return Response(
         content=ics,

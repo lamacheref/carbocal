@@ -5,7 +5,7 @@ __pycache__/
 ref/
 *.ics
 .~lock.*#
-SendRendezvous.code-workspace
+CarboCal.code-workspace
 Dockerfile
 docker-compose.yml
 .dockerignore

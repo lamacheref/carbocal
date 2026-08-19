@@ -11,7 +11,7 @@ _NAMESPACE = uuid.NAMESPACE_URL
 
 def make_uid(*parts) -> str:
     key = "|".join(str(p) for p in parts)
-    return f"{uuid.uuid5(_NAMESPACE, key)}@sendrendezvous"
+    return f"{uuid.uuid5(_NAMESPACE, key)}@carbocal"
 
 
 def _series_key(row: RawRow):

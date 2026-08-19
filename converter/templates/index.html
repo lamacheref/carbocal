@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SendRendezvous — Conversion XLSX → ICS</title>
+<title>CarboCal — Fichier Excel / Calc vers calendrier Carbonio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -12,7 +12,6 @@
     --primary: #1565c0;
     --primary-dark: #0d47a1;
     --primary-light: #e3f2fd;
-    --accent: #00b0ff;
     --surface: #ffffff;
     --on-surface: #212121;
     --text-muted: #616161;
@@ -20,105 +19,87 @@
     --success: #2e7d32;
     --footer-bg: #102027;
     --footer-fg: #cfd8dc;
-    --radius: 12px;
+    --radius: 10px;
     --shadow-1: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
     --shadow-2: 0 3px 6px rgba(0,0,0,.16), 0 3px 6px rgba(0,0,0,.23);
-    --shadow-3: 0 10px 20px rgba(0,0,0,.19), 0 6px 6px rgba(0,0,0,.23);
   }
 
   * { box-sizing: border-box; }
 
-  html, body {
-    margin: 0;
-    padding: 0;
-    min-height: 100%;
-  }
+  html, body { margin: 0; padding: 0; height: 100%; }
 
   body {
     font-family: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
     color: var(--on-surface);
     background: #f5f7fa;
-    background-image:
-      radial-gradient(circle at 10% 0%, rgba(21,101,192,.08), transparent 40%),
-      radial-gradient(circle at 90% 20%, rgba(0,176,255,.06), transparent 40%);
-    background-attachment: fixed;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    padding-bottom: 56px; /* hauteur du pied de page fixe */
+    height: 100vh;
+    overflow: hidden;
   }
 
   /* Barre d'application */
-  header {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: #fff;
-    box-shadow: var(--shadow-3);
-  }
+  header { flex: 0 0 auto; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; box-shadow: var(--shadow-1); }
   .appbar {
-    max-width: 760px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px 20px 24px;
+    padding: 10px 20px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
   }
   .appbar .logo {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
+    width: 38px; height: 38px; border-radius: 50%;
     background: rgba(255,255,255,.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    flex: 0 0 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; flex: 0 0 38px;
   }
-  .appbar h1 { margin: 0; font-size: 1.35rem; font-weight: 500; }
-  .appbar p { margin: 2px 0 0; font-size: .85rem; opacity: .85; font-weight: 300; }
+  .appbar h1 { margin: 0; font-size: 1.2rem; font-weight: 500; }
+  .appbar p { margin: 0; font-size: .8rem; opacity: .85; font-weight: 300; }
 
-  main {
+  /* Disposition principale */
+  .layout { flex: 1; min-height: 0; display: flex; }
+
+  .content {
     flex: 1;
-    width: 100%;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 24px 16px 16px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px 14px 16px;
+    overflow: hidden;
   }
 
   .card {
     background: var(--surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow-1);
-    padding: 24px;
-    margin-bottom: 20px;
+    padding: 14px 18px;
   }
-  .card h2 { margin: 0 0 6px; font-size: 1.1rem; font-weight: 500; }
-  .card .hint { margin: 0 0 18px; color: var(--text-muted); font-size: .88rem; }
+  .card h2 { margin: 0 0 4px; font-size: .98rem; font-weight: 500; }
+  .card .hint { margin: 0 0 10px; color: var(--text-muted); font-size: .8rem; }
 
   /* Zone de dépôt */
   .dropzone {
     border: 2px dashed #90a4ae;
     border-radius: var(--radius);
-    padding: 28px 16px;
+    padding: 16px;
     text-align: center;
     cursor: pointer;
     transition: border-color .2s, background .2s;
     color: var(--text-muted);
+    font-size: .85rem;
   }
-  .dropzone.dragover {
-    border-color: var(--primary);
-    background: var(--primary-light);
-    color: var(--primary-dark);
-  }
-  .dropzone .icon { font-size: 2.2rem; line-height: 1; }
+  .dropzone.dragover { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
   .dropzone .file-name { font-weight: 500; color: var(--primary-dark); word-break: break-all; }
 
   /* Champs Material */
-  .field { margin-top: 20px; position: relative; }
+  .field { margin-top: 12px; position: relative; }
   .field input,
   .field select {
     width: 100%;
-    padding: 16px 0 8px;
-    font-size: 1rem;
+    padding: 14px 0 7px;
+    font-size: .92rem;
     font-family: inherit;
     color: var(--on-surface);
     background: transparent;
@@ -140,110 +121,117 @@
   .field select:focus { border-bottom-color: var(--primary); }
   .field label {
     position: absolute;
-    left: 0;
-    top: 16px;
+    left: 0; top: 14px;
     color: var(--text-muted);
     pointer-events: none;
     transition: all .18s ease;
-    font-size: 1rem;
+    font-size: .92rem;
   }
   .field input:focus + label,
   .field input:not(:placeholder-shown) + label,
-  .field select + label {
-    top: -6px;
-    font-size: .75rem;
-    color: var(--primary);
-  }
+  .field select + label { top: -7px; font-size: .7rem; color: var(--primary); }
   .field input::placeholder { color: transparent; }
 
-  /* Bouton */
+  /* Valeurs révélables (fuseau, serveur) */
+  .reveal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding: 4px 0 6px;
+    border-bottom: 1px dashed #e0e0e0;
+    font-size: .85rem;
+    color: var(--text-muted);
+  }
+  .reveal b { color: var(--on-surface); font-weight: 500; }
+  .reveal button.link {
+    background: none; border: 0; color: var(--primary);
+    cursor: pointer; font-size: .8rem; font-family: inherit; padding: 0;
+    text-decoration: underline;
+  }
+  .hidden { display: none !important; }
+
+  /* Boutons */
   .btn {
     position: relative;
     overflow: hidden;
-    margin-top: 24px;
-    width: 100%;
-    padding: 14px 24px;
-    font-size: 1rem;
+    padding: 11px 18px;
+    font-size: .92rem;
     font-weight: 500;
     font-family: inherit;
     letter-spacing: .3px;
     color: #fff;
     background: var(--primary);
     border: 0;
-    border-radius: 28px;
-    box-shadow: var(--shadow-2);
+    border-radius: 24px;
+    box-shadow: var(--shadow-1);
     cursor: pointer;
     transition: background .2s, box-shadow .2s;
+    white-space: nowrap;
   }
-  .btn:hover { background: var(--primary-dark); box-shadow: var(--shadow-3); }
-  .btn:active { box-shadow: var(--shadow-1); }
+  .btn:hover { background: var(--primary-dark); }
   .btn:disabled { background: #9e9e9e; box-shadow: none; cursor: wait; }
   .btn-outline {
-    background: transparent;
-    color: var(--primary);
-    border: 2px solid var(--primary);
-    box-shadow: none;
+    background: transparent; color: var(--primary);
+    border: 2px solid var(--primary); box-shadow: none;
   }
-  .btn-outline:hover { background: var(--primary-light); box-shadow: none; }
-  .ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255,255,255,.4);
-    transform: scale(0);
-    animation: ripple .6s ease-out;
-    pointer-events: none;
+  .btn-outline:hover { background: var(--primary-light); }
+  .actions { display: flex; gap: 12px; margin-top: 14px; }
+  .actions .btn { flex: 1; }
+
+  /* Barre d'information (droite, fixe) */
+  .info {
+    flex: 0 0 250px;
+    border-left: 1px solid #e0e0e0;
+    background: var(--surface);
+    padding: 16px;
+    overflow: auto;
   }
-  @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+  .info h3 { margin: 0 0 8px; font-size: .9rem; font-weight: 500; color: var(--primary-dark); }
+  .info ul { margin: 0 0 14px; padding-left: 18px; font-size: .8rem; color: var(--text-muted); }
+  .info li { margin: 4px 0; }
+  .info .template-btn { display: block; text-align: center; }
 
   /* Résultat */
-  .result { display: none; }
-  .result.ok { border-left: 4px solid var(--success); display: block; }
-  .result.err { border-left: 4px solid var(--error); display: block; }
-  .result .title { font-weight: 500; margin-bottom: 4px; }
+  .result { display: none; flex: 0 0 auto; }
+  .result.ok { display: block; border-left: 4px solid var(--success); }
+  .result.err { display: block; border-left: 4px solid var(--error); }
+  .result .title { font-weight: 500; font-size: .9rem; margin-bottom: 2px; }
   .result.ok .title { color: var(--success); }
   .result.err .title { color: var(--error); }
-  .result .detail { color: var(--text-muted); font-size: .88rem; white-space: pre-wrap; word-break: break-word; }
-  .result pre { white-space: pre-wrap; word-break: break-word; }
+  .result .detail { color: var(--text-muted); font-size: .8rem; white-space: pre-wrap; word-break: break-word; }
 
   /* Pied de page fixe */
   footer {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 48px;
+    flex: 0 0 auto;
+    height: 42px;
     background: var(--footer-bg);
     color: var(--footer-fg);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: .85rem;
+    font-size: .82rem;
     letter-spacing: .5px;
-    z-index: 10;
   }
 
   /* Snackbar */
   #snackbar {
     position: fixed;
-    left: 50%;
-    bottom: 64px;
+    left: 50%; bottom: 56px;
     transform: translateX(-50%) translateY(120%);
-    background: #323232;
-    color: #fff;
-    padding: 14px 24px;
-    border-radius: 8px;
-    box-shadow: var(--shadow-3);
-    font-size: .9rem;
-    z-index: 20;
-    max-width: 90vw;
+    background: #323232; color: #fff;
+    padding: 12px 22px; border-radius: 8px;
+    box-shadow: var(--shadow-2);
+    font-size: .85rem; z-index: 20; max-width: 90vw;
     transition: transform .25s ease;
   }
   #snackbar.show { transform: translateX(-50%) translateY(0); }
 
-  @media (min-width: 560px) {
-    .appbar { padding-top: 28px; padding-bottom: 32px; }
-    .btn { width: auto; min-width: 200px; }
-    .card { padding: 32px; }
+  @media (max-width: 1000px) {
+    body { overflow: auto; height: auto; }
+    .layout { flex-direction: column; }
+    .content { overflow: auto; }
+    .info { flex: none; border-left: 0; border-top: 1px solid #e0e0e0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -255,32 +243,32 @@
 
 <header>
   <div class="appbar">
-    <div class="logo">SR</div>
+    <div class="logo">CC</div>
     <div>
-      <h1>SendRendezvous</h1>
-      <p>Conversion de rendez-vous XLSX vers un calendrier .ics Carbonio</p>
+      <h1>CarboCal</h1>
+      <p>Fichier Excel / Calc → fichier calendrier Carbonio</p>
     </div>
   </div>
 </header>
 
-<main>
-  <section class="card">
-    <h2>Conversion XLSX → ICS</h2>
-    <p class="hint">Chargez un fichier Excel (feuille « Import_Carbonio ») et obtenez un fichier .ics importable dans Carbonio. Les séries répétées sont regroupées en événements récurrents.</p>
-
-    <form id="form" novalidate>
-      <input type="file" id="file" name="file" accept=".xlsx,.xlsm" hidden required>
-      <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choisir un fichier XLSX">
-        <div class="icon">📄</div>
-        <div id="dz-text">Glissez-déposez le fichier XLSX<br>ou cliquez pour parcourir</div>
+<div class="layout">
+  <main class="content">
+    <section class="card">
+      <h2>1. Charger votre fichier</h2>
+      <input type="file" id="file" accept=".xlsx,.xlsm" hidden>
+      <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choisir un fichier Excel ou Calc">
+        <div id="dz-text">Glissez-déposez votre fichier Excel / Calc (.xlsx)<br>ou cliquez pour parcourir</div>
       </div>
+    </section>
 
-      <div class="field">
-        <input type="email" id="organizer" name="organizer" placeholder=" " autocomplete="email">
-        <label for="organizer">Email organisateur (compte qui importe)</label>
+    <section class="card">
+      <h2>2. Importer dans Carbonio</h2>
+
+      <div class="reveal" id="tz-reveal">
+        <span>Fuseau horaire : <b id="tz-label">Europe/Paris</b></span>
+        <button type="button" class="link" id="tz-toggle">Modifier</button>
       </div>
-
-      <div class="field">
+      <div class="field hidden" id="tz-field">
         <select id="tzid" name="tzid">
           <option value="Europe/Paris" selected>Europe/Paris</option>
           <optgroup label="Europe">
@@ -335,68 +323,90 @@
         <label for="tzid">Fuseau horaire</label>
       </div>
 
-      <button type="submit" class="btn" id="submit" disabled>Convertir en .ics</button>
-    </form>
-  </section>
-
-  <section class="card">
-    <h2>Import direct dans Carbonio (CalDAV)</h2>
-    <p class="hint">Crée les rendez-vous dans votre calendrier Carbonio et envoie les invitations aux invités. Les identifiants sont saisis à chaque import et ne sont pas stockés.</p>
-
-    <form id="form-caldav">
-      <div class="field">
-        <input type="text" id="server" name="server" value="https://mail.smiden.fr" placeholder=" " autocomplete="off">
+      <div class="reveal" id="server-reveal">
+        <span>Serveur Carbonio : <b id="server-label">__CARBOCAL_SERVER__</b></span>
+        <button type="button" class="link" id="server-toggle">Modifier</button>
+      </div>
+      <div class="field hidden" id="server-field">
+        <input type="text" id="server" value="__CARBOCAL_SERVER__" placeholder=" " autocomplete="off">
         <label for="server">Serveur Carbonio</label>
       </div>
 
       <div class="field">
-        <input type="text" id="login" name="login" placeholder=" " autocomplete="username">
-        <label for="login">Compte CalDAV</label>
+        <input type="text" id="login" placeholder=" " autocomplete="username">
+        <label for="login">Votre Email Carbonio</label>
       </div>
 
       <div class="field">
-        <input type="password" id="password" name="password" placeholder=" " autocomplete="current-password">
+        <input type="password" id="password" placeholder=" " autocomplete="current-password">
         <label for="password">Mot de passe</label>
       </div>
 
       <button type="button" class="btn btn-outline" id="load-calendars">Charger les calendriers</button>
 
       <div class="field">
-        <select id="calendar" name="calendar">
+        <select id="calendar">
           <option value="">— charger les calendriers d'abord —</option>
         </select>
         <label for="calendar">Calendrier cible</label>
       </div>
 
       <div class="field">
-        <input type="number" id="delay" name="delay" value="0.5" min="0" step="0.1" placeholder=" ">
-        <label for="delay">Pause entre deux créations (s)</label>
+        <input type="number" id="delay" value="0.5" min="0.5" step="0.1" readonly placeholder=" ">
+        <label for="delay">Pause en seconde entre deux créations</label>
       </div>
 
-      <button type="submit" class="btn" id="import-btn" disabled>Importer dans Carbonio</button>
-    </form>
-  </section>
+      <div class="actions">
+        <button type="button" class="btn" id="convert-btn" disabled>Convertir en fichier calendrier</button>
+        <button type="button" class="btn" id="import-btn" disabled>Importer dans Carbonio</button>
+      </div>
+    </section>
 
-  <section class="card result" id="result" aria-live="polite">
-    <div class="title" id="result-title"></div>
-    <div class="detail" id="result-detail"></div>
-  </section>
-</main>
+    <section class="card result" id="result" aria-live="polite">
+      <div class="title" id="result-title"></div>
+      <div class="detail" id="result-detail"></div>
+    </section>
+  </main>
+
+  <aside class="info">
+    <h3>Formats pris en charge</h3>
+    <ul>
+      <li><b>Fichier Excel / Calc</b> — extension <b>.xlsx</b></li>
+      <li>Colonnes attendues (dans l'ordre) :<br><b>Sujet</b> · <b>Date</b> · <b>Heure début</b> · <b>Heure fin</b> · <b>Lieu</b> · <b>Invités</b></li>
+      <li>Date au format <b>JJ/MM/AAAA</b>, heures <b>HH:MM</b></li>
+      <li>Plusieurs invités séparés par des <b>;</b></li>
+      <li>Rendez-vous sans heures = <b>journée complète</b></li>
+      <li>Les séries identiques sont regroupées en <b>événements récurrents</b></li>
+    </ul>
+    <a class="btn btn-outline template-btn" href="/template">Télécharger le modèle vierge</a>
+  </aside>
+</div>
 
 <footer>SMIDEN — 2026</footer>
 
 <div id="snackbar" role="status"></div>
 
 <script>
-const form = document.getElementById('form');
 const fileInput = document.getElementById('file');
 const dropzone = document.getElementById('dropzone');
 const dzText = document.getElementById('dz-text');
-const submitBtn = document.getElementById('submit');
+const convertBtn = document.getElementById('convert-btn');
+const importBtn = document.getElementById('import-btn');
 const result = document.getElementById('result');
 const resultTitle = document.getElementById('result-title');
 const resultDetail = document.getElementById('result-detail');
 const snackbar = document.getElementById('snackbar');
+const tzSelect = document.getElementById('tzid');
+const tzLabel = document.getElementById('tz-label');
+const tzField = document.getElementById('tz-field');
+const serverInput = document.getElementById('server');
+const serverLabel = document.getElementById('server-label');
+const serverField = document.getElementById('server-field');
+const loginInput = document.getElementById('login');
+const passwordInput = document.getElementById('password');
+const delayInput = document.getElementById('delay');
+const loadCalBtn = document.getElementById('load-calendars');
+const calSelect = document.getElementById('calendar');
 let snackbarTimer = null;
 
 function showSnackbar(msg) {
@@ -406,15 +416,37 @@ function showSnackbar(msg) {
   snackbarTimer = setTimeout(() => snackbar.classList.remove('show'), 3500);
 }
 
-function setFile(name) {
-  dzText.innerHTML = '<span class="file-name">' + name + '</span>';
-  submitBtn.disabled = false;
+function showResult(title, detail, isError) {
+  resultTitle.textContent = title;
+  resultDetail.textContent = detail;
+  result.className = 'card result ' + (isError ? 'err' : 'ok');
 }
 
-dropzone.addEventListener('click', () => fileInput.click());
-dropzone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
-fileInput.addEventListener('change', () => { if (fileInput.files.length) setFile(fileInput.files[0].name); });
+/* --- Révélation fuseau / serveur --- */
+document.getElementById('tz-toggle').addEventListener('click', () => {
+  const showing = !tzField.classList.contains('hidden');
+  tzField.classList.toggle('hidden', showing);
+  document.getElementById('tz-toggle').textContent = showing ? 'Modifier' : 'Masquer';
+});
+document.getElementById('server-toggle').addEventListener('click', () => {
+  const showing = !serverField.classList.contains('hidden');
+  serverField.classList.toggle('hidden', showing);
+  document.getElementById('server-toggle').textContent = showing ? 'Modifier' : 'Masquer';
+});
+tzSelect.addEventListener('change', () => { tzLabel.textContent = tzSelect.value; });
+serverInput.addEventListener('input', () => { serverLabel.textContent = serverInput.value.trim() || serverInput.defaultValue; });
 
+/* --- Fichier --- */
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) {
+    dzText.innerHTML = '<span class="file-name">' + fileInput.files[0].name + '</span>';
+  }
+  updateState();
+});
 ['dragover', 'dragenter'].forEach((ev) =>
   dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); }));
 ['dragleave', 'drop'].forEach((ev) =>
@@ -425,87 +457,21 @@ dropzone.addEventListener('drop', (e) => {
     const dt = new DataTransfer();
     dt.items.add(f);
     fileInput.files = dt.files;
-    setFile(f.name);
+    dzText.innerHTML = '<span class="file-name">' + f.name + '</span>';
+    updateState();
   }
 });
 
-submitBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  const pos = submitBtn.getBoundingClientRect();
-  const ripple = document.createElement('span');
-  const size = Math.max(pos.width, pos.height);
-  ripple.className = 'ripple';
-  ripple.style.width = ripple.style.height = size + 'px';
-  ripple.style.left = (e.clientX - pos.left - size / 2) + 'px';
-  ripple.style.top = (e.clientY - pos.top - size / 2) + 'px';
-  submitBtn.appendChild(ripple);
-  setTimeout(() => ripple.remove(), 600);
-  doSubmit();
-});
-
-async function doSubmit() {
-  if (!fileInput.files.length) { showSnackbar('Choisissez d’abord un fichier XLSX.'); return; }
-  submitBtn.disabled = true;
-  result.className = 'card result';
-  const data = new FormData(form);
-  try {
-    const res = await fetch('/convert', { method: 'POST', body: data });
-    if (!res.ok) {
-      const detail = await res.text();
-      resultTitle.textContent = 'Erreur de conversion';
-      resultDetail.textContent = detail;
-      result.className = 'card result err';
-      showSnackbar('La conversion a échoué.');
-      return;
-    }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileInput.files[0].name.replace(/\.xlsx?$/i, '') + '.ics';
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-    resultTitle.textContent = 'Conversion réussie';
-    resultDetail.textContent =
-      'Récurents : ' + res.headers.get('X-SendRendezvous-Recurring') +
-      '  •  Unitaires : ' + res.headers.get('X-SendRendezvous-Single') +
-      '  •  Lignes ignorées : ' + res.headers.get('X-SendRendezvous-Skipped') +
-      '  •  Erreurs : ' + res.headers.get('X-SendRendezvous-Errors');
-    result.className = 'card result ok';
-    showSnackbar('Fichier .ics téléchargé.');
-  } catch (err) {
-    resultTitle.textContent = 'Erreur réseau';
-    resultDetail.textContent = String(err);
-    result.className = 'card result err';
-    showSnackbar('Erreur réseau.');
-  } finally {
-    submitBtn.disabled = false;
-  }
+function updateState() {
+  const hasFile = fileInput.files.length > 0;
+  convertBtn.disabled = !hasFile;
+  importBtn.disabled = !(hasFile && calSelect.value);
 }
 
-/* --- Import CalDAV --- */
-const caldavForm = document.getElementById('form-caldav');
-const serverInput = document.getElementById('server');
-const loginInput = document.getElementById('login');
-const passwordInput = document.getElementById('password');
-const delayInput = document.getElementById('delay');
-const organizerInput = document.getElementById('organizer');
-const tzidInput = document.getElementById('tzid');
-const loadCalBtn = document.getElementById('load-calendars');
-const calSelect = document.getElementById('calendar');
-const importBtn = document.getElementById('import-btn');
-
-function updateImportState() {
-  submitBtn.disabled = !fileInput.files.length;
-  importBtn.disabled = !(fileInput.files.length && calSelect.value);
-}
-
-fileInput.addEventListener('change', updateImportState);
-calSelect.addEventListener('change', updateImportState);
-
+/* --- Calendriers --- */
 loadCalBtn.addEventListener('click', async () => {
   if (!loginInput.value.trim() || !passwordInput.value) {
-    showSnackbar('Renseignez d’abord compte et mot de passe.');
+    showSnackbar('Renseignez d’abord votre email Carbonio et votre mot de passe.');
     return;
   }
   loadCalBtn.disabled = true;
@@ -527,11 +493,9 @@ loadCalBtn.addEventListener('click', async () => {
     for (const c of data.calendars) {
       const opt = document.createElement('option');
       opt.value = c.href;
-      opt.textContent = c.name;
-      if (!defaultSet && c.name.toLowerCase() === 'calendar') {
-        opt.selected = true;
-        defaultSet = true;
-      }
+      const isDefault = (c.name || '').trim().toLowerCase() === 'calendar';
+      opt.textContent = isDefault ? 'Votre calendrier' : c.name;
+      if (!defaultSet && isDefault) { opt.selected = true; defaultSet = true; }
       calSelect.appendChild(opt);
     }
     if (!data.calendars.length) {
@@ -546,22 +510,60 @@ loadCalBtn.addEventListener('click', async () => {
   } finally {
     loadCalBtn.disabled = false;
     loadCalBtn.textContent = 'Charger les calendriers';
-    updateImportState();
+    updateState();
   }
 });
 
-caldavForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  if (!fileInput.files.length) {
-    showSnackbar('Choisissez d’abord un fichier XLSX.');
-    return;
+calSelect.addEventListener('change', updateState);
+
+/* --- Conversion --- */
+convertBtn.addEventListener('click', async () => {
+  if (!fileInput.files.length) { showSnackbar('Choisissez d’abord un fichier Excel / Calc.'); return; }
+  convertBtn.disabled = true;
+  result.className = 'card result';
+  resultTitle.textContent = 'Conversion en cours…';
+  resultDetail.textContent = '';
+  const data = new FormData();
+  data.append('file', fileInput.files[0]);
+  data.append('organizer', loginInput.value.trim());
+  data.append('tzid', tzSelect.value);
+  try {
+    const res = await fetch('/convert', { method: 'POST', body: data });
+    if (!res.ok) {
+      const detail = await res.text();
+      showResult('Erreur de conversion', detail, true);
+      showSnackbar('La conversion a échoué.');
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileInput.files[0].name.replace(/\.xlsx?$/i, '') + '.ics';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    showResult(
+      'Conversion réussie',
+      'Récurents : ' + res.headers.get('X-CarboCal-Recurring') +
+      '  •  Unitaires : ' + res.headers.get('X-CarboCal-Single') +
+      '  •  Lignes ignorées : ' + res.headers.get('X-CarboCal-Skipped') +
+      '  •  Erreurs : ' + res.headers.get('X-CarboCal-Errors'),
+      false
+    );
+    showSnackbar('Fichier calendrier téléchargé.');
+  } catch (err) {
+    showResult('Erreur réseau', String(err), true);
+    showSnackbar('Erreur réseau.');
+  } finally {
+    updateState();
   }
-  if (!calSelect.value) {
-    showSnackbar('Chargez les calendriers puis sélectionnez un calendrier.');
-    return;
-  }
+});
+
+/* --- Import --- */
+importBtn.addEventListener('click', async () => {
+  if (!fileInput.files.length) { showSnackbar('Choisissez d’abord un fichier Excel / Calc.'); return; }
+  if (!calSelect.value) { showSnackbar('Chargez les calendriers puis sélectionnez un calendrier.'); return; }
   importBtn.disabled = true;
-  importBtn.textContent = 'Import en cours…';
   result.className = 'card result';
   resultTitle.textContent = 'Import en cours…';
   resultDetail.textContent = 'Création des rendez-vous dans Carbonio…';
@@ -572,8 +574,8 @@ caldavForm.addEventListener('submit', async (e) => {
   data.append('password', passwordInput.value);
   data.append('calendar', calSelect.value);
   data.append('delay', delayInput.value || '0.5');
-  data.append('organizer', organizerInput.value.trim());
-  data.append('tzid', tzidInput.value);
+  data.append('organizer', loginInput.value.trim());
+  data.append('tzid', tzSelect.value);
   try {
     const res = await fetch('/import', { method: 'POST', body: data });
     const rep = await res.json();
@@ -582,28 +584,22 @@ caldavForm.addEventListener('submit', async (e) => {
     if (rep.created !== undefined) lines.push('Créés : ' + rep.created);
     if (rep.skipped) lines.push('Lignes ignorées : ' + rep.skipped);
     if (rep.errors && rep.errors.length) {
-      for (const er of rep.errors.slice(0, 10)) {
-        lines.push('Échec : ' + er.subject + ' — ' + er.error);
-      }
+      for (const er of rep.errors.slice(0, 10)) lines.push('Échec : ' + er.subject + ' — ' + er.error);
       if (rep.errors.length > 10) lines.push('… et ' + (rep.errors.length - 10) + ' autres échecs');
     }
-    if (rep.parse_errors && rep.parse_errors.length) {
-      lines.push('Avertissements de conversion : ' + rep.parse_errors.length);
-    }
-    resultTitle.textContent = 'Import terminé';
-    resultDetail.textContent = lines.join('\n');
-    result.className = 'card result ' + (rep.errors && rep.errors.length ? 'err' : 'ok');
+    if (rep.parse_errors && rep.parse_errors.length) lines.push('Avertissements de conversion : ' + rep.parse_errors.length);
+    showResult('Import terminé', lines.join('\n') || 'Aucune action.', Boolean(rep.errors && rep.errors.length));
     showSnackbar('Import terminé : ' + rep.created + ' créés.');
   } catch (err) {
-    resultTitle.textContent = 'Erreur d’import';
-    resultDetail.textContent = String(err.message || err);
-    result.className = 'card result err';
+    showResult('Erreur d’import', String(err.message || err), true);
     showSnackbar('Import impossible : ' + (err.message || err));
   } finally {
-    importBtn.disabled = false;
-    importBtn.textContent = 'Importer dans Carbonio';
+    updateState();
   }
 });
+
+/* Pause : empêche la saisie manuelle, conserve les spinners */
+delayInput.addEventListener('keydown', (e) => e.preventDefault());
 </script>
 </body>
 </html>

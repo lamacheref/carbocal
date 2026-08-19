@@ -16,7 +16,7 @@ from .model import RecurringEvent, SingleEvent
 
 WEEKDAY_NAMES = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]
 
-CALENDAR_PRODID = "-//SendRendezvous//Convertisseur//FR"
+CALENDAR_PRODID = "-//CarboCal//Convertisseur//FR"
 
 
 def _vtimezone(tzid: str) -> Timezone:

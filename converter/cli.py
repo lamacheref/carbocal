@@ -13,7 +13,7 @@ from .xlsx_parser import parse_workbook
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="sendrendezvous",
+        prog="carbocal",
         description="Convertit un XLSX de rendez-vous en .ics ou l'importe dans Carbonio via CalDAV.",
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")

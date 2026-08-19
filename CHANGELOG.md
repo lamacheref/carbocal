@@ -11,6 +11,25 @@ Le numéro de version suit le schéma `M.m.f` et le fichier `VERSION` fait foi.
 
 - Réorientation du projet : le **convertisseur XLSX → ICS** devient la priorité (phase 1), l'automatisation se fera via **CalDAV** (phase 2), et l'**API SOAP** Carbonio est déconseillée (optionnel post-release).
 
+## [Unreleased]
+
+### Changé
+
+- **Interface utilisateur** revue pour les utilisateurs finaux :
+  - Vocabulaire : « Fichier Excel / Calc » (au lieu de XLSX), « fichier calendrier » (au lieu d'ICS), « Votre Email Carbonio » (au lieu de Compte CalDAV), mention CalDAV retirée de l'interface.
+  - **Barre d'information fixe à droite** : formats pris en charge + téléchargement d'un **modèle vierge** (`/template`) avec les bonnes colonnes.
+  - Fuseau horaire et serveur Carbonio **masqués par défaut** (bouton « Modifier »), valeurs par défaut `Europe/Paris` et `CARBOCAL_SERVER_URL`.
+  - Boutons « Convertir en fichier calendrier » et « Importer dans Carbonio » **côte à côte**.
+  - « Pause en seconde entre deux créations » : champ numérique à **spinner**, saisie manuelle bloquée, minimum **0.5**.
+  - Page dimensionnée pour un écran desktop/laptop **sans barre de défilement verticale** (repli responsive sous 1000 px).
+- Serveur Carbonio configurable via la variable d'environnement `CARBOCAL_SERVER_URL` (Docker `.env`).
+- Au chargement des calendriers, le calendrier « Calendar » est affiché « Votre calendrier » (les autres libellés sont conservés).
+
+### Ajouté
+
+- **CI/CD Gitea Actions** (`.gitea/workflows/docker.yml`) : build + push de l'image `gitea.smiden.eu/flamachere/carbocal` sur push `main` et tags `v*` (secrets `CC_USER` / `CC_TOKEN` requis).
+- **`docker-compose.prod.yml`** : déploiement en tirant l'image publiée (`docker compose -f docker-compose.prod.yml up -d`).
+
 ## [0.3.0] — 2026-08-19
 
 ### Ajouté
@@ -26,6 +45,10 @@ Le numéro de version suit le schéma `M.m.f` et le fichier `VERSION` fait foi.
 
 - Erreurs gérées proprement : URL invalide → 400, identifiants refusés par `https://mail.smiden.fr/dav/` → 502 « Unauthorized ».
 - Non-régression `/convert` (200) et rendu du GUI (carte CalDAV présente).
+
+### Changé
+
+- Projet renommé **SendRendezvous → CarboCal** (titre, CLI, conteneurs Docker, domaine des UID, en-têtes web).
 
 ## [0.2.0] — 2026-08-19
 

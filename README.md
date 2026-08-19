@@ -1,4 +1,4 @@
-# SendRendezvous
+# CarboCal
 
 Conversion et import massif de rendez-vous XLSX vers **Carbonio**.
 
@@ -64,18 +64,33 @@ La stratégie a été réorientée :
 
 ### Avec Docker
 
+#### Développement (build local)
+
 ```bash
 docker compose up -d --build        # http://<serveur>:8123
 ```
 
-Ou sans compose :
+#### Production (image construite par Gitea Actions)
 
 ```bash
-docker build -t sendrendezvous:0.2.0 .
-docker run -d --name sendrendezvous -p 8123:8000 --restart unless-stopped sendrendezvous:0.2.0
+docker compose -f docker-compose.prod.yml up -d
 ```
 
-Le conteneur expose l'interface sur le port **8000** (mappé sur **8123** par défaut dans `docker-compose.yml`), avec un healthcheck HTTP.
+Le serveur Carbonio est défini par la variable `CARBOCAL_SERVER_URL` (défaut `https://mail.smiden.fr`), masquée dans l'interface (champ « à faire apparaître »).
+
+## CI/CD (Gitea Actions)
+
+Le workflow `.gitea/workflows/docker.yml` construit l'image sur chaque push sur `main` (et les tags `v*`) et la publie sur le registre Gitea : `gitea.smiden.eu/flamachere/carbocal` (tags `latest`, `vX.Y.Z`, `sha-…`).
+
+**Prérequis** : créer deux secrets dans *Réglages du dépôt → Actions* :
+- `CC_USER` : utilisateur du registre (ex. nom de compte Gitea ou compte dédié) ;
+- `CC_TOKEN` : Personal Access Token Gitea avec la permission **`write:package`** (et `read:repository`).
+
+Vérifier le build dans *Actions* ; une fois l'image publiée :
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
 
 ## État d'avancement
 

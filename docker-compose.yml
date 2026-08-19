@@ -1,8 +1,10 @@
 services:
-  sendrendezvous:
+  carbocal:
     build: .
-    image: sendrendezvous:0.2.0
-    container_name: sendrendezvous
+    image: carbocal:0.3.0
+    container_name: carbocal
     ports:
       - "8123:8000"
+    environment:
+      - CARBOCAL_SERVER_URL=${CARBOCAL_SERVER_URL:-https://mail.smiden.fr}
     restart: unless-stopped

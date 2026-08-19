@@ -1,0 +1,16 @@
+# Production : tire l'image construite par Gitea Actions
+# et la lance sur le port 8123.
+#
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Variable (optionnelle) : CARBOCAL_SERVER_URL (défaut https://mail.smiden.fr)
+
+services:
+  carbocal:
+    image: gitea.smiden.eu/flamachere/carbocal:latest
+    container_name: carbocal
+    ports:
+      - "8123:8000"
+    environment:
+      - CARBOCAL_SERVER_URL=${CARBOCAL_SERVER_URL:-https://mail.smiden.fr}
+    restart: unless-stopped
