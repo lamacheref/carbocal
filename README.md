@@ -43,8 +43,40 @@ La stratégie a été réorientée :
 | `ref/` | Fichiers de référence (XLSX, etc.) |
 | `converter/` | Code du convertisseur (parsing, récurrence, ICS, CLI, web) |
 | `requirements.txt` | Dépendances Python |
+| `Dockerfile`, `docker-compose.yml` | Déploiement conteneur |
 | `.venv/` | Environnement virtuel (non versionné) |
+
+## Utilisation (v0.3.0)
+
+### En local
+
+```bash
+.venv/bin/pip install -r requirements.txt   # 1re fois
+.venv/bin/uvicorn converter.web:app          # GUI : http://127.0.0.1:8000
+
+# CLI : conversion XLSX -> .ics
+.venv/bin/python -m converter --input ref/xxx.xlsx --output calendrier.ics --organizer prenom.nom@domaine.fr
+
+# CLI : import direct dans Carbonio (CalDAV) avec invitations
+.venv/bin/python -m converter import --input ref/xxx.xlsx \
+  --server https://mail.smiden.fr --login prenom.nom@domaine.fr --calendar Calendar
+```
+
+### Avec Docker
+
+```bash
+docker compose up -d --build        # http://<serveur>:8123
+```
+
+Ou sans compose :
+
+```bash
+docker build -t sendrendezvous:0.2.0 .
+docker run -d --name sendrendezvous -p 8123:8000 --restart unless-stopped sendrendezvous:0.2.0
+```
+
+Le conteneur expose l'interface sur le port **8000** (mappé sur **8123** par défaut dans `docker-compose.yml`), avec un healthcheck HTTP.
 
 ## État d'avancement
 
-Le projet est à l'étape d'**initialisation** (objectif 1 terminé). Le **Jalon 1 — Convertisseur XLSX → ICS** est le prochain objectif. Voir `ROADMAP.md` pour les détails.
+Le **Jalon 1 — Convertisseur XLSX → ICS** est implémenté (v0.2.0), le **Jalon 2 — Import CalDAV** (v0.3.0) aussi. Reste la **recette** : import du `.ics` dans Carbonio et un premier import CalDAV réel avec un compte valide. L'option API SOAP reste non retenue. Voir `ROADMAP.md`.

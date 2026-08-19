@@ -1,0 +1,8 @@
+services:
+  sendrendezvous:
+    build: .
+    image: sendrendezvous:0.2.0
+    container_name: sendrendezvous
+    ports:
+      - "8123:8000"
+    restart: unless-stopped

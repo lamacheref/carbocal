@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SendRendezvous — Conversion XLSX → ICS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1565c0;
+    --primary-dark: #0d47a1;
+    --primary-light: #e3f2fd;
+    --accent: #00b0ff;
+    --surface: #ffffff;
+    --on-surface: #212121;
+    --text-muted: #616161;
+    --error: #d32f2f;
+    --success: #2e7d32;
+    --footer-bg: #102027;
+    --footer-fg: #cfd8dc;
+    --radius: 12px;
+    --shadow-1: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
+    --shadow-2: 0 3px 6px rgba(0,0,0,.16), 0 3px 6px rgba(0,0,0,.23);
+    --shadow-3: 0 10px 20px rgba(0,0,0,.19), 0 6px 6px rgba(0,0,0,.23);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+  }
+
+  body {
+    font-family: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--on-surface);
+    background: #f5f7fa;
+    background-image:
+      radial-gradient(circle at 10% 0%, rgba(21,101,192,.08), transparent 40%),
+      radial-gradient(circle at 90% 20%, rgba(0,176,255,.06), transparent 40%);
+    background-attachment: fixed;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 56px; /* hauteur du pied de page fixe */
+  }
+
+  /* Barre d'application */
+  header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    box-shadow: var(--shadow-3);
+  }
+  .appbar {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 20px 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .appbar .logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex: 0 0 44px;
+  }
+  .appbar h1 { margin: 0; font-size: 1.35rem; font-weight: 500; }
+  .appbar p { margin: 2px 0 0; font-size: .85rem; opacity: .85; font-weight: 300; }
+
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-1);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card h2 { margin: 0 0 6px; font-size: 1.1rem; font-weight: 500; }
+  .card .hint { margin: 0 0 18px; color: var(--text-muted); font-size: .88rem; }
+
+  /* Zone de dépôt */
+  .dropzone {
+    border: 2px dashed #90a4ae;
+    border-radius: var(--radius);
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    color: var(--text-muted);
+  }
+  .dropzone.dragover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary-dark);
+  }
+  .dropzone .icon { font-size: 2.2rem; line-height: 1; }
+  .dropzone .file-name { font-weight: 500; color: var(--primary-dark); word-break: break-all; }
+
+  /* Champs Material */
+  .field { margin-top: 20px; position: relative; }
+  .field input,
+  .field select {
+    width: 100%;
+    padding: 16px 0 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--on-surface);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid #9e9e9e;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .field select {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23616161' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 2px center;
+    padding-right: 20px;
+  }
+  .field input:focus,
+  .field select:focus { border-bottom-color: var(--primary); }
+  .field label {
+    position: absolute;
+    left: 0;
+    top: 16px;
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: all .18s ease;
+    font-size: 1rem;
+  }
+  .field input:focus + label,
+  .field input:not(:placeholder-shown) + label,
+  .field select + label {
+    top: -6px;
+    font-size: .75rem;
+    color: var(--primary);
+  }
+  .field input::placeholder { color: transparent; }
+
+  /* Bouton */
+  .btn {
+    position: relative;
+    overflow: hidden;
+    margin-top: 24px;
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: inherit;
+    letter-spacing: .3px;
+    color: #fff;
+    background: var(--primary);
+    border: 0;
+    border-radius: 28px;
+    box-shadow: var(--shadow-2);
+    cursor: pointer;
+    transition: background .2s, box-shadow .2s;
+  }
+  .btn:hover { background: var(--primary-dark); box-shadow: var(--shadow-3); }
+  .btn:active { box-shadow: var(--shadow-1); }
+  .btn:disabled { background: #9e9e9e; box-shadow: none; cursor: wait; }
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    box-shadow: none;
+  }
+  .btn-outline:hover { background: var(--primary-light); box-shadow: none; }
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,.4);
+    transform: scale(0);
+    animation: ripple .6s ease-out;
+    pointer-events: none;
+  }
+  @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+  /* Résultat */
+  .result { display: none; }
+  .result.ok { border-left: 4px solid var(--success); display: block; }
+  .result.err { border-left: 4px solid var(--error); display: block; }
+  .result .title { font-weight: 500; margin-bottom: 4px; }
+  .result.ok .title { color: var(--success); }
+  .result.err .title { color: var(--error); }
+  .result .detail { color: var(--text-muted); font-size: .88rem; white-space: pre-wrap; word-break: break-word; }
+  .result pre { white-space: pre-wrap; word-break: break-word; }
+
+  /* Pied de page fixe */
+  footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48px;
+    background: var(--footer-bg);
+    color: var(--footer-fg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .85rem;
+    letter-spacing: .5px;
+    z-index: 10;
+  }
+
+  /* Snackbar */
+  #snackbar {
+    position: fixed;
+    left: 50%;
+    bottom: 64px;
+    transform: translateX(-50%) translateY(120%);
+    background: #323232;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-3);
+    font-size: .9rem;
+    z-index: 20;
+    max-width: 90vw;
+    transition: transform .25s ease;
+  }
+  #snackbar.show { transform: translateX(-50%) translateY(0); }
+
+  @media (min-width: 560px) {
+    .appbar { padding-top: 28px; padding-bottom: 32px; }
+    .btn { width: auto; min-width: 200px; }
+    .card { padding: 32px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="appbar">
+    <div class="logo">SR</div>
+    <div>
+      <h1>SendRendezvous</h1>
+      <p>Conversion de rendez-vous XLSX vers un calendrier .ics Carbonio</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Conversion XLSX → ICS</h2>
+    <p class="hint">Chargez un fichier Excel (feuille « Import_Carbonio ») et obtenez un fichier .ics importable dans Carbonio. Les séries répétées sont regroupées en événements récurrents.</p>
+
+    <form id="form" novalidate>
+      <input type="file" id="file" name="file" accept=".xlsx,.xlsm" hidden required>
+      <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choisir un fichier XLSX">
+        <div class="icon">📄</div>
+        <div id="dz-text">Glissez-déposez le fichier XLSX<br>ou cliquez pour parcourir</div>
+      </div>
+
+      <div class="field">
+        <input type="email" id="organizer" name="organizer" placeholder=" " autocomplete="email">
+        <label for="organizer">Email organisateur (compte qui importe)</label>
+      </div>
+
+      <div class="field">
+        <select id="tzid" name="tzid">
+          <option value="Europe/Paris" selected>Europe/Paris</option>
+          <optgroup label="Europe">
+            <option value="Europe/London">Europe/London</option>
+            <option value="Europe/Lisbon">Europe/Lisbon</option>
+            <option value="Europe/Madrid">Europe/Madrid</option>
+            <option value="Europe/Brussels">Europe/Brussels</option>
+            <option value="Europe/Amsterdam">Europe/Amsterdam</option>
+            <option value="Europe/Berlin">Europe/Berlin</option>
+            <option value="Europe/Rome">Europe/Rome</option>
+            <option value="Europe/Zurich">Europe/Zurich</option>
+            <option value="Europe/Stockholm">Europe/Stockholm</option>
+            <option value="Europe/Vienna">Europe/Vienna</option>
+            <option value="Europe/Prague">Europe/Prague</option>
+            <option value="Europe/Warsaw">Europe/Warsaw</option>
+            <option value="Europe/Athens">Europe/Athens</option>
+            <option value="Europe/Bucharest">Europe/Bucharest</option>
+            <option value="Europe/Helsinki">Europe/Helsinki</option>
+            <option value="Europe/Kyiv">Europe/Kyiv</option>
+            <option value="Europe/Istanbul">Europe/Istanbul</option>
+            <option value="Europe/Moscow">Europe/Moscow</option>
+          </optgroup>
+          <optgroup label="Afrique">
+            <option value="Africa/Casablanca">Africa/Casablanca</option>
+            <option value="Africa/Algiers">Africa/Algiers</option>
+            <option value="Africa/Tunis">Africa/Tunis</option>
+            <option value="Africa/Dakar">Africa/Dakar</option>
+          </optgroup>
+          <optgroup label="Amériques">
+            <option value="America/New_York">America/New_York</option>
+            <option value="America/Chicago">America/Chicago</option>
+            <option value="America/Denver">America/Denver</option>
+            <option value="America/Los_Angeles">America/Los_Angeles</option>
+            <option value="America/Toronto">America/Toronto</option>
+            <option value="America/Sao_Paulo">America/Sao_Paulo</option>
+            <option value="America/Argentina/Buenos_Aires">America/Argentina/Buenos_Aires</option>
+          </optgroup>
+          <optgroup label="Asie / Pacifique">
+            <option value="Asia/Dubai">Asia/Dubai</option>
+            <option value="Asia/Kolkata">Asia/Kolkata</option>
+            <option value="Asia/Jerusalem">Asia/Jerusalem</option>
+            <option value="Asia/Singapore">Asia/Singapore</option>
+            <option value="Asia/Hong_Kong">Asia/Hong_Kong</option>
+            <option value="Asia/Shanghai">Asia/Shanghai</option>
+            <option value="Asia/Tokyo">Asia/Tokyo</option>
+            <option value="Australia/Sydney">Australia/Sydney</option>
+            <option value="Australia/Melbourne">Australia/Melbourne</option>
+            <option value="Pacific/Auckland">Pacific/Auckland</option>
+          </optgroup>
+          <option value="Etc/UTC">Etc/UTC</option>
+        </select>
+        <label for="tzid">Fuseau horaire</label>
+      </div>
+
+      <button type="submit" class="btn" id="submit" disabled>Convertir en .ics</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Import direct dans Carbonio (CalDAV)</h2>
+    <p class="hint">Crée les rendez-vous dans votre calendrier Carbonio et envoie les invitations aux invités. Les identifiants sont saisis à chaque import et ne sont pas stockés.</p>
+
+    <form id="form-caldav">
+      <div class="field">
+        <input type="text" id="server" name="server" value="https://mail.smiden.fr" placeholder=" " autocomplete="off">
+        <label for="server">Serveur Carbonio</label>
+      </div>
+
+      <div class="field">
+        <input type="text" id="login" name="login" placeholder=" " autocomplete="username">
+        <label for="login">Compte CalDAV</label>
+      </div>
+
+      <div class="field">
+        <input type="password" id="password" name="password" placeholder=" " autocomplete="current-password">
+        <label for="password">Mot de passe</label>
+      </div>
+
+      <button type="button" class="btn btn-outline" id="load-calendars">Charger les calendriers</button>
+
+      <div class="field">
+        <select id="calendar" name="calendar">
+          <option value="">— charger les calendriers d'abord —</option>
+        </select>
+        <label for="calendar">Calendrier cible</label>
+      </div>
+
+      <div class="field">
+        <input type="number" id="delay" name="delay" value="0.5" min="0" step="0.1" placeholder=" ">
+        <label for="delay">Pause entre deux créations (s)</label>
+      </div>
+
+      <button type="submit" class="btn" id="import-btn" disabled>Importer dans Carbonio</button>
+    </form>
+  </section>
+
+  <section class="card result" id="result" aria-live="polite">
+    <div class="title" id="result-title"></div>
+    <div class="detail" id="result-detail"></div>
+  </section>
+</main>
+
+<footer>SMIDEN — 2026</footer>
+
+<div id="snackbar" role="status"></div>
+
+<script>
+const form = document.getElementById('form');
+const fileInput = document.getElementById('file');
+const dropzone = document.getElementById('dropzone');
+const dzText = document.getElementById('dz-text');
+const submitBtn = document.getElementById('submit');
+const result = document.getElementById('result');
+const resultTitle = document.getElementById('result-title');
+const resultDetail = document.getElementById('result-detail');
+const snackbar = document.getElementById('snackbar');
+let snackbarTimer = null;
+
+function showSnackbar(msg) {
+  snackbar.textContent = msg;
+  snackbar.classList.add('show');
+  clearTimeout(snackbarTimer);
+  snackbarTimer = setTimeout(() => snackbar.classList.remove('show'), 3500);
+}
+
+function setFile(name) {
+  dzText.innerHTML = '<span class="file-name">' + name + '</span>';
+  submitBtn.disabled = false;
+}
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+fileInput.addEventListener('change', () => { if (fileInput.files.length) setFile(fileInput.files[0].name); });
+
+['dragover', 'dragenter'].forEach((ev) =>
+  dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); }));
+['dragleave', 'drop'].forEach((ev) =>
+  dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
+dropzone.addEventListener('drop', (e) => {
+  const f = e.dataTransfer.files[0];
+  if (f) {
+    const dt = new DataTransfer();
+    dt.items.add(f);
+    fileInput.files = dt.files;
+    setFile(f.name);
+  }
+});
+
+submitBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  const pos = submitBtn.getBoundingClientRect();
+  const ripple = document.createElement('span');
+  const size = Math.max(pos.width, pos.height);
+  ripple.className = 'ripple';
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = (e.clientX - pos.left - size / 2) + 'px';
+  ripple.style.top = (e.clientY - pos.top - size / 2) + 'px';
+  submitBtn.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+  doSubmit();
+});
+
+async function doSubmit() {
+  if (!fileInput.files.length) { showSnackbar('Choisissez d’abord un fichier XLSX.'); return; }
+  submitBtn.disabled = true;
+  result.className = 'card result';
+  const data = new FormData(form);
+  try {
+    const res = await fetch('/convert', { method: 'POST', body: data });
+    if (!res.ok) {
+      const detail = await res.text();
+      resultTitle.textContent = 'Erreur de conversion';
+      resultDetail.textContent = detail;
+      result.className = 'card result err';
+      showSnackbar('La conversion a échoué.');
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileInput.files[0].name.replace(/\.xlsx?$/i, '') + '.ics';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    resultTitle.textContent = 'Conversion réussie';
+    resultDetail.textContent =
+      'Récurents : ' + res.headers.get('X-SendRendezvous-Recurring') +
+      '  •  Unitaires : ' + res.headers.get('X-SendRendezvous-Single') +
+      '  •  Lignes ignorées : ' + res.headers.get('X-SendRendezvous-Skipped') +
+      '  •  Erreurs : ' + res.headers.get('X-SendRendezvous-Errors');
+    result.className = 'card result ok';
+    showSnackbar('Fichier .ics téléchargé.');
+  } catch (err) {
+    resultTitle.textContent = 'Erreur réseau';
+    resultDetail.textContent = String(err);
+    result.className = 'card result err';
+    showSnackbar('Erreur réseau.');
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+
+/* --- Import CalDAV --- */
+const caldavForm = document.getElementById('form-caldav');
+const serverInput = document.getElementById('server');
+const loginInput = document.getElementById('login');
+const passwordInput = document.getElementById('password');
+const delayInput = document.getElementById('delay');
+const organizerInput = document.getElementById('organizer');
+const tzidInput = document.getElementById('tzid');
+const loadCalBtn = document.getElementById('load-calendars');
+const calSelect = document.getElementById('calendar');
+const importBtn = document.getElementById('import-btn');
+
+function updateImportState() {
+  submitBtn.disabled = !fileInput.files.length;
+  importBtn.disabled = !(fileInput.files.length && calSelect.value);
+}
+
+fileInput.addEventListener('change', updateImportState);
+calSelect.addEventListener('change', updateImportState);
+
+loadCalBtn.addEventListener('click', async () => {
+  if (!loginInput.value.trim() || !passwordInput.value) {
+    showSnackbar('Renseignez d’abord compte et mot de passe.');
+    return;
+  }
+  loadCalBtn.disabled = true;
+  loadCalBtn.textContent = 'Chargement…';
+  try {
+    const res = await fetch('/calendars', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        server: serverInput.value.trim(),
+        login: loginInput.value.trim(),
+        password: passwordInput.value,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || ('HTTP ' + res.status));
+    calSelect.innerHTML = '';
+    let defaultSet = false;
+    for (const c of data.calendars) {
+      const opt = document.createElement('option');
+      opt.value = c.href;
+      opt.textContent = c.name;
+      if (!defaultSet && c.name.toLowerCase() === 'calendar') {
+        opt.selected = true;
+        defaultSet = true;
+      }
+      calSelect.appendChild(opt);
+    }
+    if (!data.calendars.length) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'aucun calendrier trouvé';
+      calSelect.appendChild(opt);
+    }
+    showSnackbar('Calendriers chargés (' + data.calendars.length + ').');
+  } catch (err) {
+    showSnackbar('Chargement impossible : ' + err.message);
+  } finally {
+    loadCalBtn.disabled = false;
+    loadCalBtn.textContent = 'Charger les calendriers';
+    updateImportState();
+  }
+});
+
+caldavForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!fileInput.files.length) {
+    showSnackbar('Choisissez d’abord un fichier XLSX.');
+    return;
+  }
+  if (!calSelect.value) {
+    showSnackbar('Chargez les calendriers puis sélectionnez un calendrier.');
+    return;
+  }
+  importBtn.disabled = true;
+  importBtn.textContent = 'Import en cours…';
+  result.className = 'card result';
+  resultTitle.textContent = 'Import en cours…';
+  resultDetail.textContent = 'Création des rendez-vous dans Carbonio…';
+  const data = new FormData();
+  data.append('file', fileInput.files[0]);
+  data.append('server', serverInput.value.trim());
+  data.append('login', loginInput.value.trim());
+  data.append('password', passwordInput.value);
+  data.append('calendar', calSelect.value);
+  data.append('delay', delayInput.value || '0.5');
+  data.append('organizer', organizerInput.value.trim());
+  data.append('tzid', tzidInput.value);
+  try {
+    const res = await fetch('/import', { method: 'POST', body: data });
+    const rep = await res.json();
+    if (!res.ok) throw new Error(rep.detail || ('HTTP ' + res.status));
+    const lines = [];
+    if (rep.created !== undefined) lines.push('Créés : ' + rep.created);
+    if (rep.skipped) lines.push('Lignes ignorées : ' + rep.skipped);
+    if (rep.errors && rep.errors.length) {
+      for (const er of rep.errors.slice(0, 10)) {
+        lines.push('Échec : ' + er.subject + ' — ' + er.error);
+      }
+      if (rep.errors.length > 10) lines.push('… et ' + (rep.errors.length - 10) + ' autres échecs');
+    }
+    if (rep.parse_errors && rep.parse_errors.length) {
+      lines.push('Avertissements de conversion : ' + rep.parse_errors.length);
+    }
+    resultTitle.textContent = 'Import terminé';
+    resultDetail.textContent = lines.join('\n');
+    result.className = 'card result ' + (rep.errors && rep.errors.length ? 'err' : 'ok');
+    showSnackbar('Import terminé : ' + rep.created + ' créés.');
+  } catch (err) {
+    resultTitle.textContent = 'Erreur d’import';
+    resultDetail.textContent = String(err.message || err);
+    result.className = 'card result err';
+    showSnackbar('Import impossible : ' + (err.message || err));
+  } finally {
+    importBtn.disabled = false;
+    importBtn.textContent = 'Importer dans Carbonio';
+  }
+});
+</script>
+</body>
+</html>

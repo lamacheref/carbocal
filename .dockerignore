@@ -1,0 +1,11 @@
+.git/
+.venv/
+__pycache__/
+*.pyc
+ref/
+*.ics
+.~lock.*#
+SendRendezvous.code-workspace
+Dockerfile
+docker-compose.yml
+.dockerignore
