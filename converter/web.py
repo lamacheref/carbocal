@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from pydantic import BaseModel
@@ -19,6 +19,7 @@ from .xlsx_parser import parse_workbook
 app = FastAPI(title="CarboCal", version="0.3.0")
 
 _TEMPLATES = Path(__file__).parent / "templates"
+_STATIC = Path(__file__).parent / "static"
 
 DEFAULT_SERVER = os.environ.get("CARBOCAL_SERVER_URL", "https://mail.smiden.fr")
 
@@ -46,6 +47,16 @@ def _load_rows(content: bytes, filename: str) -> tuple[list, list[str]]:
 async def index() -> str:
     html = (_TEMPLATES / "index.html").read_text(encoding="utf-8")
     return html.replace("__CARBOCAL_SERVER__", DEFAULT_SERVER)
+
+
+@app.get("/favicon.ico")
+async def favicon_ico() -> FileResponse:
+    return FileResponse(_STATIC / "favicon.ico", media_type="image/x-icon")
+
+
+@app.get("/favicon.png")
+async def favicon_png() -> FileResponse:
+    return FileResponse(_STATIC / "favicon.png", media_type="image/png")
 
 
 @app.get("/template")
